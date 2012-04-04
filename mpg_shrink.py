@@ -27,6 +27,7 @@ if sys.version_info < (2, 7):
     sys.exit(1)
 
 # helpers
+# TODO - remove projectx wrapper and make path to jar configurable
 px    = '/home/svenh/bin/projectx -out %s %s'
 tcr   = '/usr/bin/tcrequant -i %s -o %s -f %f'
 mplex = '/usr/bin/mplex -f8 %s %s -o %s' 
