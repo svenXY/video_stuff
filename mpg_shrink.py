@@ -10,10 +10,11 @@
 ###################################################
 
 import os
+import os.path
 import sys
 import argparse
 import re
-from subprocess import call, PIPE, STDOUT
+from subprocess import Popen, call, PIPE, STDOUT
 from shutil     import rmtree
 from time       import time
 import logging
@@ -27,10 +28,9 @@ if sys.version_info < (2, 7):
     sys.exit(1)
 
 # helpers
-# TODO - remove projectx wrapper and make path to jar configurable
-px    = '/home/svenh/bin/projectx -out %s %s'
-tcr   = '/usr/bin/tcrequant -i %s -o %s -f %f'
-mplex = '/usr/bin/mplex -f8 %s %s -o %s' 
+px    = '~/bin/projectx -out %s %s'
+m2vrequant = '/usr/bin/M2VRequantiser %f %i'
+mplex = '/usr/bin/mplex -f8 %s -o %s' 
 
 def main():
     start = time()
@@ -63,7 +63,9 @@ def main():
 
     # actually do something 
     v = Video(source, filesize)
-    v.resize_video()
+    ret = v.resize_video()
+    if ret:
+        logger.warn('resizing returned with %d' % ret)
     v.multiplex()
 
     logger.debug("Processing complete. It took %d seconds" % (int(time() - start)))
@@ -138,17 +140,8 @@ class Video:
 
     def multiplex(self):
         logger.debug("Multiplexing to destination file %s" % self.destination)
-        audio = ' '.join([os.path.join(self.tempdir,track.filename) 
-                          for track 
-                          in self.tracks 
-                          if track.type != 'm2v'
-                        ])
-        video = ' '.join([os.path.join(self.tempdir,track.filename) 
-                          for track
-                          in self.tracks 
-                          if track.type == 'm2v'
-                        ]) 
-        cmd = mplex % ( video, audio, self.destination) 
+        cmd = mplex % ( ' '.join([os.path.join(self.tempdir,track.filename) for track in self.tracks]), 
+                       self.destination) 
         if run(cmd, args.verbose) == 0:
             logger.info("You should have a nice movie in %s" % self.destination )
             self.cleanup()
@@ -177,27 +170,33 @@ class Track:
     def resize(self, factor, dir):
         assert self.type == 'm2v'
         infile = self.filename
+        size = os.path.getsize(os.path.join(dir, infile))
         outfile = re.sub('\.', '_requant.', infile)
         self.filename = outfile
-        cmd = tcr % (os.path.join(dir, infile), os.path.join(dir, outfile), factor)
+        cmd = m2vrequant % (factor, size)
         logger.debug("Resizing Video track with factor %f" % factor)
 
-        run(cmd, args.verbose)
+        return comm(cmd, os.path.join(dir, infile), os.path.join(dir, outfile), args.verbose)
 
 
 def run(cmd, loud=False):
     cmds = cmd.split()
+    logger.debug(cmd)
     if loud:
         return call(cmds)
     else:
-        return call(cmds, stdout=PIPE, stderr=STDOUT)
+        return call(cmds, stdout=PIPE, stderr=STDOUT, shell=True)
+
+def comm(cmd, In, Out, loud=False):
+    cmds = cmd.split()
+    logger.debug(cmd)
+    out = open(Out, 'w');
+    process = Popen(cmds, stdout=out, stdin=open(In),
+                    close_fds=True)
+    (stdoutdata, stderrdata) = process.communicate()
+    return process.returncode
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
 
 
