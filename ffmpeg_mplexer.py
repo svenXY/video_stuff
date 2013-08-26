@@ -39,7 +39,7 @@ movie = os.path.splitext(m2v)[0]
 
 map_num = 1
 maps = [ '-map', '0:0' ]
-encodes = [ '-vcodec', 'libx264' ]
+encodes = [ '-vcodec', 'libx264', '-qscale', '2' ]
 inputs = [ '-i', m2v_complete ]
 
 
@@ -57,9 +57,9 @@ for ext in ['.ac3', '.mp2', '-02.mp2']:
 
 cmd = ['ffmpeg']
 cmd.extend(inputs)
-cmd.extend(encodes[0:2])
+cmd.extend(encodes[0:4])
 cmd.append(os.path.join(path, movie + '.mkv'))
-cmd.extend(encodes[2:])
+cmd.extend(encodes[4:])
 cmd.extend(maps)
 
 print "Running the following command:"
