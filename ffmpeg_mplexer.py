@@ -40,7 +40,8 @@ except IndexError:
 
 encoders = { 
     '.m2v':'libx264',
-    '.mp2':'libfaac',
+    # '.mp2':'libfaac',
+    '.mp2':'libfdk_aac',
     '.ac3':'copy'
 }
 
@@ -56,7 +57,7 @@ movie_name = ' '.join( fields.capitalize() for fields in movie.split('_' ))
 
 map_num = 1
 maps = [ '-map', '0:0' ]
-encodes = [ '-vcodec', 'libx264', '-qscale', '2' ]
+encodes = [ '-c:v:0', 'libx264', '-q:v', '2' ]
 inputs = [ '-i', m2v_complete ]
 tag_cmd = ['mkvpropedit', 
            "%s.mkv" % os.path.join(path, movie),
@@ -71,9 +72,9 @@ for ext in ['.ac3', '.mp2', '-02.mp2']:
          realext = os.path.splitext(os.path.join(path, movie+ext))[1]
          inputs.append('-i')
          inputs.append(os.path.join(path, movie+ext))
-         encodes.append("-acodec:%d" % map_num)
+         encodes.append("-c:a:%d" % (map_num-1))
          encodes.append(encoders[realext])
-         map_num>1 and  encodes.append('-newaudio')
+         # map_num>1 and  encodes.append('-newaudio')
          maps.append("-map")
          maps.append("%d:0" % map_num)
          tag_cmd.append("--edit") 
@@ -90,10 +91,9 @@ for ext in ['.ac3', '.mp2', '-02.mp2']:
 
 cmd = ['ffmpeg']
 cmd.extend(inputs)
-cmd.extend(encodes[0:6])
-cmd.append(os.path.join(path, movie + '.mkv'))
-cmd.extend(encodes[6:])
 cmd.extend(maps)
+cmd.extend(encodes)
+cmd.append(os.path.join(path, movie + '.mkv'))
 
 print "Running the following ffmpeg command to reencode and mux in one go:"
 print ' '.join(cmd)
