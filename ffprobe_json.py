@@ -24,7 +24,7 @@ class FFProbe(object):
             raise IOError('ffprobe not found.')
         if os.path.isfile(video_file):
             p = subprocess.Popen(["ffprobe","-show_streams", '-print_format', 'json',
-                      '-loglevel', 'quiet', sys.argv[1]],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                      '-loglevel', 'quiet', self.video_file],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 
             data = json.loads(''.join(p.stdout))
             self.streams = data['streams']
