@@ -46,7 +46,7 @@ class FFProbe(object):
                ]
 
 if __name__ == '__main__':
-    ffp = FFProbe(sys.argv[0])
+    ffp = FFProbe(sys.argv[1])
     print "All streams:"
     print "\n".join(["Stream %d: %s, %s, %s" % stream for stream in
                      ffp.summary()])
