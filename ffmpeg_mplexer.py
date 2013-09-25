@@ -8,24 +8,18 @@ but the syntax is quite crude.
 After cutting and demultiplexing with ProjectX, you usually end up with files
 ending in
 
-m2v - the video
+m2v - the video (anamorphic 720x576 and probably interlaced)
 ac3 - the audio in AC3
-mp2 (and sometines also -02.mp2) - audio in MPEG-2 - one for each language
+mp2 (and sometimes also -02.mp2) - audio in MPEG-2
 
 If you want  to multiplex them all into one nice matroska container while at the
-same time reenosing m2v to h264 and mp2 to aac, this will do it for you.
+same time reencoding m2v to h264 and mp2 to aac (ac3 will be kept as it is), this will do it for you.
 
-this is how it's supposed to look like:
-ffmpeg -i my_movie.m2v -i my_movie.ac3 -i my_movie.mp2 -i my_movie-02.mp2 \
-        -vcodec libx264 -acodec:1 copy bla.mkv -acodec:2 libfaac -newaudio \
-        -acodec:3 libfaac -newaudio -map 0:0 -map 1:0 -map 2:0 -map 3:0
+At the same time it will deinterlace if necessary (yadif) and remove anamorphism
+(scale).
 
 It will also try to tag the matroska container with title, audio format and
-language like so:
-mkvpropedit my_movie.mkv --edit info --set "title=My Movie" \
-        --edit track:a1 --set flag-default=0 --set name='AC3' --set language=ger \
-        --edit track:a2 --set flag-default=1 --set name='AAC' --set language=ger \
-        --edit track:a3 --set flag-default=0 --set name='AAC' --set language=ger
+language
 '''
 
 import sys
@@ -57,7 +51,8 @@ movie_name = ' '.join( fields.capitalize() for fields in movie.split('_' ))
 
 map_num = 1
 maps = [ '-map', '0:0' ]
-encodes = [ '-c:v:0', 'libx264', '-q:v', '2' ]
+encodes = [ '-c:v:0', 'libx264', '-crf', '20', '-vf',
+           'yadif=0:-1:0,scale=1024:576,setsar=1/1']
 inputs = [ '-i', m2v_complete ]
 tag_cmd = ['mkvpropedit', 
            "%s.mkv" % os.path.join(path, movie),

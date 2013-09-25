@@ -1,24 +1,7 @@
 #!/usr/bin/env python
 '''
-Encode, mux and tag a matroska container video 
-
-ffmpeg can be used to multiplex and encode in one pass
-but the syntax is quite crude.
-
-After cutting and demultiplexing with ProjectX, you usually end up with files
-ending in
-
-mkv - the video
-ac3 - the audio in AC3
-mp2 (and sometines also -02.mp2) - audio in MPEG-2 - one for each language
-
-If you want  to multiplex them all into one nice matroska container while at the
-same time reenosing mkv to h264 and mp2 to aac, this will do it for you.
-
-this is how it's supposed to look like:
-ffmpeg -i my_movie.mkv -i my_movie.ac3 -i my_movie.mp2 -i my_movie-02.mp2 \
-        -vcodec libx264 -acodec:1 copy bla.mkv -acodec:2 libfaac -newaudio \
-        -acodec:3 libfaac -newaudio -map 0:0 -map 1:0 -map 2:0 -map 3:0
+Reencode a matroska container video
+from anamorphic 720x576 to non-anamorphic 1024x576
 
 It will also try to tag the matroska container with title, audio format and
 language like so:
@@ -58,8 +41,8 @@ else:
     outpath = os.path.join(path, movie + out_scale)
 
 maps = [ '-map', '0:0' ]
-encodes = [ '-c:v:0', 'libx264', '-q:v', '0', '-vf',
-           'scale=1024:576,setsar=1/1']
+encodes = [ '-c:v:0', 'libx264', '-crf', '20', '-vf',
+           'yadif=0:-1:0,scale=1024:576,setsar=1/1']
 inputs = [ '-i', mkv_orig ]
 tag_cmd = ['mkvpropedit', 
            outpath,
