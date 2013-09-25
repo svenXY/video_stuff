@@ -34,7 +34,6 @@ except IndexError:
 
 encoders = { 
     '.m2v':'libx264',
-    # '.mp2':'libfaac',
     '.mp2':'libfdk_aac',
     '.ac3':'copy'
 }
@@ -51,7 +50,7 @@ movie_name = ' '.join( fields.capitalize() for fields in movie.split('_' ))
 
 map_num = 1
 maps = [ '-map', '0:0' ]
-encodes = [ '-c:v:0', 'libx264', '-crf', '20', '-vf',
+encodes = [ '-c:v:0', 'libx264', '-preset', 'slow', '-crf', '20', '-vf',
            'yadif=0:-1:0,scale=1024:576,setsar=1/1']
 inputs = [ '-i', m2v_complete ]
 tag_cmd = ['mkvpropedit', 

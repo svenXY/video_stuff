@@ -31,8 +31,11 @@ def get_movie_name(meta_file):
 
     if name != description:
         name = name.rstrip() + '-' + description.rstrip()
+    else:
+        name = name.rstrip()
         
     name = name.replace(' ', '_')
+    name = name.replace('/', '-')
     print "Movie name taken from meta file: %s" % name
     return name
 

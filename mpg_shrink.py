@@ -28,7 +28,7 @@ if sys.version_info < (2, 7):
     sys.exit(1)
 
 # helpers
-px    = '~/bin/projectx -out %s %s'
+px    = '/usr/bin/projectx -out %s %s'
 m2vrequant = '/usr/bin/M2VRequantiser %f %i'
 mplex = '/usr/bin/mplex -f8 %s -o %s' 
 
@@ -97,7 +97,7 @@ class Video:
 
     def demultiplex(self):
         try:
-            logger.debug("Demultiplexing %s into %s" % (self.source, self.tempdir))
+            logger.info("Demultiplexing %s into %s" % (self.source, self.tempdir))
             try:
                 os.mkdir(self.tempdir)
             except OSError, e:
@@ -181,11 +181,11 @@ class Track:
 
 def run(cmd, loud=False):
     cmds = cmd.split()
-    logger.debug(cmd)
+    logger.info(cmd)
     if loud:
         return call(cmds)
     else:
-        return call(cmds, stdout=PIPE, stderr=STDOUT, shell=True)
+        return call(cmd, stdout=PIPE, stderr=STDOUT, shell=True)
 
 def comm(cmd, In, Out, loud=False):
     cmds = cmd.split()
