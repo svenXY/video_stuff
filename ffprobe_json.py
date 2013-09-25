@@ -53,3 +53,9 @@ if __name__ == '__main__':
     print "Video streams:"
     print "\n".join(["Stream %d: %s, %s, %s" % stream for stream in
                      ffp.summary('video')])
+
+    print len(ffp.streams)
+    for a_str in ffp.streams[1:]:
+        print a_str['index']
+        print a_str['codec_name']
+        print a_str['codec_long_name']
